@@ -2,9 +2,10 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
-# --------------------------------------------------
+
+# =========================================================
 # CONFIGURACIÓN
-# --------------------------------------------------
+# =========================================================
 
 st.set_page_config(
     page_title="OILWATCH",
@@ -12,87 +13,80 @@ st.set_page_config(
     layout="wide"
 )
 
-# --------------------------------------------------
+
+# =========================================================
 # ESTILOS
-# --------------------------------------------------
+# =========================================================
 
 st.markdown("""
 <style>
 
     .stApp {
         background-color: #0b1220;
-        color: #f1f5f9;
+        color: #f8fafc;
     }
 
     .main-title {
-        font-size: 42px;
+        font-size: 44px;
         font-weight: 800;
         color: #f8fafc;
         margin-bottom: 0;
     }
 
     .subtitle {
-        color: #94a3b8;
         font-size: 17px;
-        margin-top: 0;
-    }
-
-    .metric-card {
-        background: linear-gradient(145deg, #111c2e, #16243a);
-        padding: 22px;
-        border-radius: 14px;
-        border: 1px solid #26364d;
-        text-align: center;
-    }
-
-    .metric-title {
         color: #94a3b8;
-        font-size: 14px;
-        text-transform: uppercase;
+        margin-bottom: 25px;
     }
 
-    .metric-value {
-        color: #f8fafc;
-        font-size: 32px;
+    .section-title {
+        font-size: 22px;
         font-weight: 700;
-        margin-top: 5px;
+        color: #f8fafc;
+        margin-top: 25px;
+        margin-bottom: 10px;
     }
 
-    .normal-box {
-        background-color: #123524;
-        border: 1px solid #2d8a57;
-        padding: 18px;
-        border-radius: 12px;
-        text-align: center;
+    .info-box {
+        background-color: #111c2e;
+        border: 1px solid #26364d;
+        padding: 20px;
+        border-radius: 14px;
     }
 
     .alert-box {
         background-color: #3b1b1b;
         border: 1px solid #dc5555;
-        padding: 18px;
-        border-radius: 12px;
+        padding: 20px;
+        border-radius: 14px;
         text-align: center;
     }
 
-    .section-title {
-        color: #f8fafc;
-        font-size: 22px;
-        font-weight: 700;
-        margin-top: 25px;
+    .monitor-box {
+        background-color: #102b3a;
+        border: 1px solid #28728a;
+        padding: 20px;
+        border-radius: 14px;
+        text-align: center;
+    }
+
+    .small-text {
+        color: #94a3b8;
+        font-size: 14px;
     }
 
 </style>
 """, unsafe_allow_html=True)
 
 
-# --------------------------------------------------
+# =========================================================
 # CARGAR DATOS
-# --------------------------------------------------
+# =========================================================
 
 @st.cache_data
 def load_data():
 
-    data = pd.read_csv("oilwatch_NK68.csv")
+    data = pd.read_csv("oilwatch_all_wells.csv")
 
     data["timestamp"] = pd.to_datetime(data["timestamp"])
 
@@ -102,24 +96,74 @@ def load_data():
 df = load_data()
 
 
-# --------------------------------------------------
-# INFORMACIÓN GENERAL
-# --------------------------------------------------
+# =========================================================
+# SIDEBAR
+# =========================================================
 
-well = df["well_id"].iloc[0]
+st.sidebar.markdown("## 🛢️ OILWATCH")
 
-total_records = len(df)
+st.sidebar.markdown(
+    "### Selección de pozo"
+)
 
-normal_count = (df["anomaly"] == 1).sum()
+wells = sorted(df["well_id"].unique())
 
-anomaly_count = (df["anomaly"] == -1).sum()
+selected_well = st.sidebar.selectbox(
+    "Pozo",
+    wells
+)
 
-anomaly_percentage = anomaly_count / total_records * 100
+st.sidebar.divider()
+
+st.sidebar.markdown("### Variables monitoreadas")
+
+st.sidebar.write("• SPM")
+st.sidebar.write("• Pump Fillage")
+st.sidebar.write("• Min Rod Weight")
+st.sidebar.write("• Max Rod Weight")
+st.sidebar.write("• Dynamometer Area")
+
+st.sidebar.divider()
+
+st.sidebar.caption(
+    "Prototipo de detección de comportamientos "
+    "anómalos mediante Machine Learning."
+)
 
 
-# --------------------------------------------------
+# =========================================================
+# FILTRAR POZO
+# =========================================================
+
+df_well = df[
+    df["well_id"] == selected_well
+].copy()
+
+df_well = df_well.sort_values("timestamp")
+
+
+# =========================================================
+# MÉTRICAS
+# =========================================================
+
+total_records = len(df_well)
+
+normal_count = (
+    df_well["anomaly"] == 1
+).sum()
+
+anomaly_count = (
+    df_well["anomaly"] == -1
+).sum()
+
+anomaly_percentage = (
+    anomaly_count / total_records * 100
+)
+
+
+# =========================================================
 # HEADER
-# --------------------------------------------------
+# =========================================================
 
 st.markdown(
     '<div class="main-title">🛢️ OILWATCH</div>',
@@ -127,28 +171,28 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="subtitle">Intelligent Oil Well Monitoring</div>',
+    '<div class="subtitle">'
+    'Intelligent Oil Well Monitoring'
+    '</div>',
     unsafe_allow_html=True
 )
 
-st.divider()
 
-
-# --------------------------------------------------
-# INFORMACIÓN DEL POZO
-# --------------------------------------------------
+# =========================================================
+# POZO SELECCIONADO
+# =========================================================
 
 col1, col2 = st.columns([2, 1])
 
 with col1:
 
     st.markdown(
-        f"### Pozo monitoreado: `{well}`"
+        f"## Pozo monitoreado: `{selected_well}`"
     )
 
     st.write(
-        "Sistema de detección de comportamientos anómalos "
-        "basado en datos de sensores."
+        "Sistema de monitoreo basado en datos reales "
+        "de sensores de un pozo petrolero."
     )
 
 
@@ -159,8 +203,15 @@ with col2:
         st.markdown(
             f"""
             <div class="alert-box">
+
                 <h2>⚠️ ATENCIÓN</h2>
-                <p>Se detectaron comportamientos atípicos</p>
+
+                <p>
+                Se detectaron
+                <b>{anomaly_count}</b>
+                comportamientos atípicos.
+                </p>
+
             </div>
             """,
             unsafe_allow_html=True
@@ -170,73 +221,131 @@ with col2:
 
         st.markdown(
             """
-            <div class="normal-box">
-                <h2>🟢 NORMAL</h2>
-                <p>No se detectaron anomalías</p>
+            <div class="monitor-box">
+
+                <h2>🟢 ESTABLE</h2>
+
+                <p>
+                No se detectaron comportamientos atípicos.
+                </p>
+
             </div>
             """,
             unsafe_allow_html=True
         )
 
 
-# --------------------------------------------------
+# =========================================================
 # MÉTRICAS
-# --------------------------------------------------
+# =========================================================
 
 st.markdown(
-    '<div class="section-title">Resumen del monitoreo</div>',
+    '<div class="section-title">'
+    '📊 Resumen del monitoreo'
+    '</div>',
     unsafe_allow_html=True
 )
 
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
+
     st.metric(
         "Registros",
         f"{total_records:,}"
     )
 
 with c2:
+
     st.metric(
-        "Normales",
+        "Comportamiento normal",
         f"{normal_count:,}"
     )
 
 with c3:
+
     st.metric(
         "Anomalías",
         f"{anomaly_count:,}"
     )
 
 with c4:
+
     st.metric(
         "% anomalías",
         f"{anomaly_percentage:.1f}%"
     )
 
 
-# --------------------------------------------------
-# GRÁFICO PUMP FILLAGE
-# --------------------------------------------------
+# =========================================================
+# EXPLICACIÓN
+# =========================================================
 
 st.markdown(
-    '<div class="section-title">📈 Evolución de Pump Fillage</div>',
+    '<div class="section-title">'
+    '🧠 ¿Qué está detectando OILWATCH?'
+    '</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    f"""
+    <div class="info-box">
+
+    OILWATCH analiza simultáneamente cinco variables
+    de los sensores del pozo:
+
+    <br><br>
+
+    <b>SPM</b> · velocidad de bombeo<br>
+    <b>Pump Fillage</b> · llenado de la bomba<br>
+    <b>Min Rod Weight</b> · peso mínimo de varilla<br>
+    <b>Max Rod Weight</b> · peso máximo de varilla<br>
+    <b>Dynamometer Area</b> · área del dinamómetro
+
+    <br><br>
+
+    El modelo <b>Isolation Forest</b> identifica observaciones
+    que se alejan del comportamiento habitual del pozo.
+
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# =========================================================
+# PUMP FILLAGE
+# =========================================================
+
+st.markdown(
+    '<div class="section-title">'
+    '📈 Pump Fillage'
+    '</div>',
     unsafe_allow_html=True
 )
 
 fig = go.Figure()
 
+normal = df_well[
+    df_well["anomaly"] == 1
+]
+
+anomalies = df_well[
+    df_well["anomaly"] == -1
+]
+
+
 fig.add_trace(
     go.Scatter(
-        x=df["timestamp"],
-        y=df["pump_fillage"],
+        x=df_well["timestamp"],
+        y=df_well["pump_fillage"],
         mode="lines",
         name="Pump Fillage",
         line=dict(width=1.5)
     )
 )
 
-anomalies = df[df["anomaly"] == -1]
 
 fig.add_trace(
     go.Scatter(
@@ -245,25 +354,19 @@ fig.add_trace(
         mode="markers",
         name="Anomalía",
         marker=dict(
-            size=7,
+            size=8,
             color="#ef4444"
         )
     )
 )
 
+
 fig.update_layout(
-    height=450,
+    height=430,
     template="plotly_dark",
     xaxis_title="Fecha",
     yaxis_title="Pump Fillage",
-    hovermode="x unified",
-    legend=dict(
-        orientation="h",
-        yanchor="bottom",
-        y=1.02,
-        xanchor="right",
-        x=1
-    )
+    hovermode="x unified"
 )
 
 st.plotly_chart(
@@ -272,26 +375,30 @@ st.plotly_chart(
 )
 
 
-# --------------------------------------------------
-# GRÁFICO MIN ROD WEIGHT
-# --------------------------------------------------
+# =========================================================
+# MIN ROD WEIGHT
+# =========================================================
 
 st.markdown(
-    '<div class="section-title">⚖️ Min Rod Weight</div>',
+    '<div class="section-title">'
+    '⚖️ Min Rod Weight'
+    '</div>',
     unsafe_allow_html=True
 )
 
 fig2 = go.Figure()
 
+
 fig2.add_trace(
     go.Scatter(
-        x=df["timestamp"],
-        y=df["min_rod_weight"],
+        x=df_well["timestamp"],
+        y=df_well["min_rod_weight"],
         mode="lines",
         name="Min Rod Weight",
         line=dict(width=1.5)
     )
 )
+
 
 fig2.add_trace(
     go.Scatter(
@@ -300,19 +407,21 @@ fig2.add_trace(
         mode="markers",
         name="Anomalía",
         marker=dict(
-            size=7,
+            size=8,
             color="#ef4444"
         )
     )
 )
 
+
 fig2.update_layout(
-    height=450,
+    height=430,
     template="plotly_dark",
     xaxis_title="Fecha",
     yaxis_title="Min Rod Weight",
     hovermode="x unified"
 )
+
 
 st.plotly_chart(
     fig2,
@@ -320,14 +429,24 @@ st.plotly_chart(
 )
 
 
-# --------------------------------------------------
+# =========================================================
 # TABLA DE ANOMALÍAS
-# --------------------------------------------------
+# =========================================================
 
 st.markdown(
-    '<div class="section-title">🚨 Últimos comportamientos anómalos</div>',
+    '<div class="section-title">'
+    '🚨 Comportamientos anómalos detectados'
+    '</div>',
     unsafe_allow_html=True
 )
+
+
+limit = st.selectbox(
+    "Cantidad de eventos a mostrar",
+    [10, 25, 50],
+    index=0
+)
+
 
 anomaly_table = anomalies[
     [
@@ -341,7 +460,8 @@ anomaly_table = anomalies[
 ].sort_values(
     "timestamp",
     ascending=False
-).head(20)
+).head(limit)
+
 
 st.dataframe(
     anomaly_table,
@@ -350,13 +470,27 @@ st.dataframe(
 )
 
 
-# --------------------------------------------------
-# PIE
-# --------------------------------------------------
+# =========================================================
+# NOTA
+# =========================================================
 
 st.divider()
 
+st.markdown(
+    """
+    <div class="small-text">
+
+    ⚠️ OILWATCH identifica comportamientos atípicos
+    respecto del patrón histórico de cada pozo.
+    Una anomalía no implica necesariamente una falla,
+    sino una señal que puede requerir revisión.
+
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 st.caption(
-    "OILWATCH — Prototipo de detección de comportamientos "
-    "anómalos en sensores de pozos petroleros."
+    "OILWATCH — Prototipo de Ciencia de Datos "
+    "para monitoreo inteligente de pozos petroleros."
 )

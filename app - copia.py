@@ -205,20 +205,21 @@ with col1:
 
 with col2:
 
-    if anomaly_percentage < 2:
+ # =========================================================
+# ESTADO DEL POZO
+# =========================================================
 
+if anomaly_percentage < 2:
     estado = "🟢 ESTABLE"
     mensaje = "El comportamiento del pozo se mantiene dentro de un patrón estable."
     clase = "monitor-box"
 
-    elif anomaly_percentage < 4:
-
+elif anomaly_percentage < 4:
     estado = "🟡 PRECAUCIÓN"
     mensaje = "Se detectaron algunos comportamientos atípicos que requieren seguimiento."
     clase = "warning-box"
 
-    else:
-
+else:
     estado = "🔴 ALERTA"
     mensaje = "Se detectaron comportamientos atípicos que requieren revisión."
     clase = "alert-box"
@@ -237,7 +238,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 
 # =========================================================
 # MÉTRICAS

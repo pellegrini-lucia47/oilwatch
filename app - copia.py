@@ -69,6 +69,13 @@ st.markdown("""
         border-radius: 14px;
         text-align: center;
     }
+        .warning-box {
+    background-color: #3a3215;
+    border: 1px solid #c9a227;
+    padding: 20px;
+    border-radius: 14px;
+    text-align: center;
+}
 
     .small-text {
         color: #94a3b8;
@@ -198,41 +205,38 @@ with col1:
 
 with col2:
 
-    if anomaly_count > 0:
+    if anomaly_percentage < 2:
 
-        st.markdown(
-            f"""
-            <div class="alert-box">
+    estado = "🟢 ESTABLE"
+    mensaje = "El comportamiento del pozo se mantiene dentro de un patrón estable."
+    clase = "monitor-box"
 
-                <h2>⚠️ ATENCIÓN</h2>
+elif anomaly_percentage < 4:
 
-                <p>
-                Se detectaron
-                <b>{anomaly_count}</b>
-                comportamientos atípicos.
-                </p>
+    estado = "🟡 PRECAUCIÓN"
+    mensaje = "Se detectaron algunos comportamientos atípicos que requieren seguimiento."
+    clase = "warning-box"
 
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+else:
 
-    else:
+    estado = "🔴 ALERTA"
+    mensaje = "Se detectaron comportamientos atípicos que requieren revisión."
+    clase = "alert-box"
 
-        st.markdown(
-            """
-            <div class="monitor-box">
 
-                <h2>🟢 ESTABLE</h2>
-
-                <p>
-                No se detectaron comportamientos atípicos.
-                </p>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+st.markdown(
+    f"""
+    <div class="{clase}">
+        <h2>{estado}</h2>
+        <p>{mensaje}</p>
+        <p>
+            <b>{anomaly_count}</b> comportamientos atípicos
+            ({anomaly_percentage:.1f}% del período analizado)
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 
 # =========================================================

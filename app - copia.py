@@ -22,66 +22,98 @@ st.set_page_config(
 st.markdown("""
 <style>
 
+    /* Paleta "Estación de campo": grafito cálido + óxido/cobre en vez del azul-gris típico */
+
     .stApp {
-        background-color: #0b1220;
-        color: #f8fafc;
+        background-color: #14120f;
+        color: #f3ede2;
+    }
+
+    /* Sidebar con el mismo tono cálido, un poco más oscuro */
+    section[data-testid="stSidebar"] {
+        background-color: #1a1712;
+        border-right: 1px solid #3a3226;
     }
 
     .main-title {
         font-size: 44px;
         font-weight: 800;
-        color: #f8fafc;
+        color: #f3ede2;
         margin-bottom: 0;
     }
 
     .subtitle {
         font-size: 17px;
-        color: #94a3b8;
+        color: #a89f8e;
         margin-bottom: 25px;
     }
 
     .section-title {
         font-size: 22px;
         font-weight: 700;
-        color: #f8fafc;
+        color: #f3ede2;
         margin-top: 25px;
         margin-bottom: 10px;
+        border-left: 4px solid #c2703d;
+        padding-left: 10px;
     }
 
     .info-box {
-        background-color: #111c2e;
-        border: 1px solid #26364d;
+        background-color: #1f1c17;
+        border: 1px solid #3a3226;
         padding: 20px;
         border-radius: 14px;
     }
 
     .alert-box {
-        background-color: #3b1b1b;
-        border: 1px solid #dc5555;
+        background-color: #2e1710;
+        border: 1px solid #c1462f;
         padding: 20px;
         border-radius: 14px;
         text-align: center;
     }
 
     .monitor-box {
-        background-color: #102b3a;
-        border: 1px solid #28728a;
+        background-color: #1c2417;
+        border: 1px solid #7a9b5a;
         padding: 20px;
         border-radius: 14px;
         text-align: center;
     }
 
     .warning-box {
-        background-color: #3a3215;
-        border: 1px solid #c9a227;
+        background-color: #2c2210;
+        border: 1px solid #d9a441;
         padding: 20px;
         border-radius: 14px;
         text-align: center;
     }
 
     .small-text {
-        color: #94a3b8;
+        color: #a89f8e;
         font-size: 14px;
+    }
+
+    /* Tarjetas de métricas (st.metric) con el mismo lenguaje visual */
+    div[data-testid="stMetric"] {
+        background-color: #1f1c17;
+        border: 1px solid #3a3226;
+        border-radius: 12px;
+        padding: 14px 16px;
+    }
+
+    div[data-testid="stMetricValue"] {
+        color: #f3ede2;
+    }
+
+    /* Pestañas con acento cobre en la seleccionada */
+    button[data-baseweb="tab"] {
+        color: #a89f8e;
+    }
+
+    button[data-baseweb="tab"][aria-selected="true"] {
+        color: #c2703d;
+        border-bottom-color: #c2703d;
     }
 
 </style>
@@ -327,10 +359,11 @@ with tab2:
 
     fig.add_hrect(
         y0=limite_inf_pf, y1=limite_sup_pf,
-        fillcolor="rgba(40,114,138,0.15)",
+        fillcolor="rgba(122,155,90,0.15)",
         line_width=0,
         annotation_text="Rango normal",
-        annotation_position="top left"
+        annotation_position="top left",
+        annotation_font_color="#a89f8e"
     )
 
     fig.add_trace(
@@ -339,7 +372,7 @@ with tab2:
             y=df_well["pump_fillage"],
             mode="lines",
             name="Pump Fillage",
-            line=dict(width=1.5)
+            line=dict(width=1.5, color="#c2703d")
         )
     )
 
@@ -349,15 +382,20 @@ with tab2:
             y=anomalies["pump_fillage"],
             mode="markers",
             name="Anomalía",
-            marker=dict(size=8, color="#ef4444")
+            marker=dict(size=8, color="#c1462f")
         )
     )
 
     fig.update_layout(
         height=430,
         template="plotly_dark",
+        paper_bgcolor="#14120f",
+        plot_bgcolor="#1f1c17",
+        font_color="#f3ede2",
         xaxis_title="Fecha",
         yaxis_title="Pump Fillage",
+        xaxis=dict(gridcolor="#3a3226"),
+        yaxis=dict(gridcolor="#3a3226"),
         hovermode="x unified"
     )
 
@@ -372,10 +410,11 @@ with tab2:
 
     fig2.add_hrect(
         y0=limite_inf_rw, y1=limite_sup_rw,
-        fillcolor="rgba(40,114,138,0.15)",
+        fillcolor="rgba(122,155,90,0.15)",
         line_width=0,
         annotation_text="Rango normal",
-        annotation_position="top left"
+        annotation_position="top left",
+        annotation_font_color="#a89f8e"
     )
 
     fig2.add_trace(
@@ -384,7 +423,7 @@ with tab2:
             y=df_well["min_rod_weight"],
             mode="lines",
             name="Min Rod Weight",
-            line=dict(width=1.5)
+            line=dict(width=1.5, color="#c2703d")
         )
     )
 
@@ -394,15 +433,20 @@ with tab2:
             y=anomalies["min_rod_weight"],
             mode="markers",
             name="Anomalía",
-            marker=dict(size=8, color="#ef4444")
+            marker=dict(size=8, color="#c1462f")
         )
     )
 
     fig2.update_layout(
         height=430,
         template="plotly_dark",
+        paper_bgcolor="#14120f",
+        plot_bgcolor="#1f1c17",
+        font_color="#f3ede2",
         xaxis_title="Fecha",
         yaxis_title="Min Rod Weight",
+        xaxis=dict(gridcolor="#3a3226"),
+        yaxis=dict(gridcolor="#3a3226"),
         hovermode="x unified"
     )
 
@@ -465,6 +509,4 @@ st.caption(
     "OILWATCH — Prototipo de Ciencia de Datos "
     "para monitoreo inteligente de pozos petroleros."
 )
-
-
 
